@@ -46,8 +46,7 @@ If above command is successful then we are good to go
 ## Execution
 
 ```sh
-mvn clean test
-```
+mvn test```
 
 all the tests of mentioned suite in pom.xml will run
 

@@ -1,0 +1,97 @@
+# To execute: docker compose -f docker-compose-v3-video.yml up -d
+# To stop:    docker compose -f docker-compose-v3-video.yml down
+
+services:
+  selenium-hub:
+    image: selenium/hub:4.41.0-20260222
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    environment:
+      # ✅ TOTAL sessions allowed across the whole grid (all browsers combined)
+      - SE_GRID_MAX_SESSION=3
+
+  chrome:
+    image: selenium/node-chrome:4.41.0-20260222
+    platform: linux/amd64
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      # Node can run up to 3, but hub will limit globally to 3 total
+      - SE_NODE_MAX_SESSIONS=3
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+
+  edge:
+    image: selenium/node-edge:4.41.0-20260222
+    platform: linux/amd64
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=3
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+
+  firefox:
+    image: selenium/node-firefox:4.41.0-20260222
+    shm_size: 2gb
+    depends_on:
+      - selenium-hub
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=3
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+
+  chrome_video:
+    image: selenium/video:ffmpeg-8.0-20260222
+    depends_on:
+      - chrome
+    volumes:
+      - ./testcaseVideos:/videos
+    environment:
+      - DISPLAY_CONTAINER_NAME=chrome
+      - SE_NODE_GRID_URL=http://selenium-hub:4444
+      - SE_VIDEO_FILE_NAME=auto
+
+  edge_video:
+    image: selenium/video:ffmpeg-8.0-20260222
+    depends_on:
+      - edge
+    volumes:
+      - ./testcaseVideos:/videos
+    environment:
+      - DISPLAY_CONTAINER_NAME=edge
+      - SE_NODE_GRID_URL=http://selenium-hub:4444
+      - SE_VIDEO_FILE_NAME=auto
+
+  firefox_video:
+    image: selenium/video:ffmpeg-8.0-20260222
+    depends_on:
+      - firefox
+    volumes:
+      - ./testcaseVideos:/videos
+    environment:
+      - DISPLAY_CONTAINER_NAME=firefox
+      - SE_NODE_GRID_URL=http://selenium-hub:4444
+      - SE_VIDEO_FILE_NAME=auto
+
+  file_browser:
+    image: filebrowser/filebrowser:latest
+    container_name: file_browser
+    restart: always
+    ports:
+      - "8081:80"
+    volumes:
+      - ./testcaseVideos:/srv
+    environment:
+      - FB_NOAUTH=true

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-node-chrome-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: selenium-node-chrome
+  template:
+    metadata:
+      labels:
+        app: selenium-node-chrome
+    spec:
+      containers:
+        - name: selenium-node-chrome
+          image: selenium/node-chrome:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: SE_EVENT_BUS_HOST
+              value: selenium-hub-service.default.svc.cluster.local
+            - name: SE_EVENT_BUS_PUBLISH_PORT
+              value: "4442"
+            - name: SE_EVENT_BUS_SUBSCRIBE_PORT
+              value: "4443"
+            - name: NODE_MAX_INSTANCES
+              value: "5"
+            - name: NODE_MAX_SESSION
+              value: "5"
+          resources:
+            requests:
+              memory: "768Mi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "2000m"
+          livenessProbe:
+            httpGet:
+              path: /wd/hub/status
+              port: 5555
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /wd/hub/status
+              port: 5555
+            initialDelaySeconds: 10
+            periodSeconds: 5
+
+

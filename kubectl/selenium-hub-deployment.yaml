@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenium-hub-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: selenium-hub
+  template:
+    metadata:
+      labels:
+        app: selenium-hub
+    spec:
+      containers:
+        - name: selenium-hub
+          image: selenium/hub:4.7.2-20221219
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 4444
+              name: hub
+            - containerPort: 4442
+              name: publish
+            - containerPort: 4443
+              name: subscribe
+          env:
+            - name: SE_EVENT_BUS_PUBLISH_PORT
+              value: "4442"
+            - name: SE_EVENT_BUS_SUBSCRIBE_PORT
+              value: "4443"
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+          livenessProbe:
+            httpGet:
+              path: /wd/hub/status
+              port: 4444
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /wd/hub/status
+              port: 4444
+            initialDelaySeconds: 10
+            periodSeconds: 5

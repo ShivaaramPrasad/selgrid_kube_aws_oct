@@ -28,6 +28,10 @@ spec:
               value: "4442"
             - name: SE_EVENT_BUS_SUBSCRIBE_PORT
               value: "4443"
+            - name: SE_HUB_HOST
+              value: selenium-hub-service.default.svc.cluster.local
+            - name: SE_HUB_PORT
+              value: "4444"
             - name: NODE_MAX_INSTANCES
               value: "5"
             - name: NODE_MAX_SESSION

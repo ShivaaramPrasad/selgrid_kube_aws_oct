@@ -1,5 +1,9 @@
 # To execute: docker compose -f docker-compose-v3.yml up -d
 # To stop:    docker compose -f docker-compose-v3.yml down
+# To scale:   docker compose -f docker-compose-v3.yml up --scale chrome=3 -d
+# Video only: docker compose --profile video -f docker-compose-v3.yml up -d
+
+version: '3.8'
 
 services:
   selenium-hub:
@@ -10,15 +14,22 @@ services:
       - "4443:4443"
       - "4444:4444"
     environment:
-      # Total sessions allowed across the whole grid
-      - SE_GRID_MAX_SESSION=3
+      - SE_GRID_MAX_SESSION=5
+      - SE_GRID_BROWSER_TIMEOUT=300
+      - SE_GRID_TIMEOUT=300
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   chrome:
     image: selenium/node-chrome:latest
     platform: linux/amd64
     shm_size: 2gb
     depends_on:
-      - selenium-hub
+      selenium-hub:
+        condition: service_healthy
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
@@ -31,7 +42,8 @@ services:
     platform: linux/amd64
     shm_size: 2gb
     depends_on:
-      - selenium-hub
+      selenium-hub:
+        condition: service_healthy
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
@@ -44,7 +56,8 @@ services:
     platform: linux/amd64
     shm_size: 2gb
     depends_on:
-      - selenium-hub
+      selenium-hub:
+        condition: service_healthy
     environment:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
@@ -62,6 +75,8 @@ services:
       - DISPLAY_CONTAINER_NAME=chrome
       - SE_NODE_GRID_URL=http://selenium-hub:4444
       - SE_VIDEO_FILE_NAME=auto
+    profiles:
+      - video
 
   edge_video:
     image: selenium/video:latest
@@ -73,6 +88,8 @@ services:
       - DISPLAY_CONTAINER_NAME=edge
       - SE_NODE_GRID_URL=http://selenium-hub:4444
       - SE_VIDEO_FILE_NAME=auto
+    profiles:
+      - video
 
   firefox_video:
     image: selenium/video:latest
@@ -84,6 +101,8 @@ services:
       - DISPLAY_CONTAINER_NAME=firefox
       - SE_NODE_GRID_URL=http://selenium-hub:4444
       - SE_VIDEO_FILE_NAME=auto
+    profiles:
+      - video
 
   file_browser:
     image: filebrowser/filebrowser:latest

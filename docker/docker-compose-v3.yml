@@ -1,20 +1,20 @@
-# To execute: docker compose -f docker-compose-v3-video.yml up -d
-# To stop:    docker compose -f docker-compose-v3-video.yml down
+# To execute: docker compose -f docker-compose-v3.yml up -d
+# To stop:    docker compose -f docker-compose-v3.yml down
 
 services:
   selenium-hub:
-    image: selenium/hub:4.41.0-20260222
+    image: selenium/hub:latest
     container_name: selenium-hub
     ports:
       - "4442:4442"
       - "4443:4443"
       - "4444:4444"
     environment:
-      # ✅ TOTAL sessions allowed across the whole grid (all browsers combined)
+      # Total sessions allowed across the whole grid
       - SE_GRID_MAX_SESSION=3
 
   chrome:
-    image: selenium/node-chrome:4.41.0-20260222
+    image: selenium/node-chrome:latest
     platform: linux/amd64
     shm_size: 2gb
     depends_on:
@@ -23,12 +23,11 @@ services:
       - SE_EVENT_BUS_HOST=selenium-hub
       - SE_EVENT_BUS_PUBLISH_PORT=4442
       - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
-      # Node can run up to 3, but hub will limit globally to 3 total
       - SE_NODE_MAX_SESSIONS=3
       - SE_NODE_OVERRIDE_MAX_SESSIONS=true
 
   edge:
-    image: selenium/node-edge:4.41.0-20260222
+    image: selenium/node-edge:latest
     platform: linux/amd64
     shm_size: 2gb
     depends_on:
@@ -41,7 +40,8 @@ services:
       - SE_NODE_OVERRIDE_MAX_SESSIONS=true
 
   firefox:
-    image: selenium/node-firefox:4.41.0-20260222
+    image: selenium/node-firefox:latest
+    platform: linux/amd64
     shm_size: 2gb
     depends_on:
       - selenium-hub
@@ -53,7 +53,7 @@ services:
       - SE_NODE_OVERRIDE_MAX_SESSIONS=true
 
   chrome_video:
-    image: selenium/video:ffmpeg-8.0-20260222
+    image: selenium/video:latest
     depends_on:
       - chrome
     volumes:
@@ -64,7 +64,7 @@ services:
       - SE_VIDEO_FILE_NAME=auto
 
   edge_video:
-    image: selenium/video:ffmpeg-8.0-20260222
+    image: selenium/video:latest
     depends_on:
       - edge
     volumes:
@@ -75,7 +75,7 @@ services:
       - SE_VIDEO_FILE_NAME=auto
 
   firefox_video:
-    image: selenium/video:ffmpeg-8.0-20260222
+    image: selenium/video:latest
     depends_on:
       - firefox
     volumes:

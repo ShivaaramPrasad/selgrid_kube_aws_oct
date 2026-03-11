@@ -15,7 +15,7 @@ spec:
       containers:
         - name: selenium-node-chrome
           image: selenium/node-chrome:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 5555
               name: node

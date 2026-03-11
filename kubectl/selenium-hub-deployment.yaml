@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
         - name: selenium-hub
-          image: selenium/hub:4.41.0
-          imagePullPolicy: IfNotPresent
+          image: selenium/hub:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 4444
               name: hub

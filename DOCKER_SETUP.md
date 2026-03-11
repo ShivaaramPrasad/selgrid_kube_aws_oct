@@ -6,7 +6,7 @@ This project uses Docker Compose to orchestrate a Selenium Grid infrastructure f
 ## Architecture
 
 ### Selenium Hub
-- **Image**: `selenium/hub:4.41.0-20260222`
+- **Image**: `selenium/hub:latest`
 - **Container Name**: `selenium-hub`
 - **Ports**: 
   - 4442: Event Bus Publish
@@ -19,21 +19,22 @@ This project uses Docker Compose to orchestrate a Selenium Grid infrastructure f
 ### Browser Nodes
 
 #### Chrome Node
-- **Image**: `selenium/node-chrome:4.41.0-20260222`
+- **Image**: `selenium/node-chrome:latest`
 - **Platform**: linux/amd64
 - **Shared Memory**: 2GB
 - **Max Sessions per Node**: 3
 - **Dependencies**: Requires selenium-hub to be running first
 
 #### Edge Node
-- **Image**: `selenium/node-edge:4.41.0-20260222`
+- **Image**: `selenium/node-edge:latest`
 - **Platform**: linux/amd64
 - **Shared Memory**: 2GB
 - **Max Sessions per Node**: 3
 - **Dependencies**: Requires selenium-hub to be running first
 
 #### Firefox Node
-- **Image**: `selenium/node-firefox:4.41.0-20260222`
+- **Image**: `selenium/node-firefox:latest`
+- **Platform**: linux/amd64
 - **Shared Memory**: 2GB
 - **Max Sessions per Node**: 3
 - **Dependencies**: Requires selenium-hub to be running first
@@ -43,7 +44,7 @@ Each browser has an accompanying video service that records test execution:
 - **Chrome Video** - Records Chrome browser tests
 - **Edge Video** - Records Edge browser tests
 - **Firefox Video** - Records Firefox browser tests
-- **Image**: `selenium/video:ffmpeg-8.0-20260222`
+- **Image**: `selenium/video:latest`
 - **Output**: Videos saved to `./testcaseVideos` directory
 - **Format**: Auto-detected by FFmpeg
 
@@ -64,8 +65,15 @@ Each browser has an accompanying video service that records test execution:
 
 ### Starting the Grid
 
-Located in the **docker** folder:
+**Option 1: Using Batch Script (Windows)**
+Double-click or run:
+```powershell
+cd docker
+start-grid.bat
+```
 
+**Option 2: Using Docker Compose Directly**
+Located in the **docker** folder:
 ```powershell
 cd docker
 docker compose -f docker-compose-v3.yml up -d
@@ -85,7 +93,16 @@ docker compose -f docker-compose-v3.yml up -d
 
 ### Stopping the Grid
 
+**Option 1: Using Batch Script (Windows)**
+Double-click or run:
 ```powershell
+cd docker
+stop-grid.bat
+```
+
+**Option 2: Using Docker Compose Directly**
+```powershell
+cd docker
 docker compose -f docker-compose-v3.yml down
 ```
 
@@ -184,8 +201,10 @@ mvn test
 project-root/
 ├── docker/
 │   ├── docker-compose-v3.yml      # Main compose configuration
-│   ├── testcaseVideos/            # Video recordings directory
-│   └── logs/                       # Container logs (if any)
+│   ├── start-grid.bat             # Windows batch script to start grid
+│   ├── stop-grid.bat              # Windows batch script to stop grid
+│   └── testcaseVideos/            # Video recordings directory
+├── DOCKER_SETUP.md                # This documentation file
 ├── src/
 │   ├── main/java/
 │   │   ├── Base/                  # Base test classes

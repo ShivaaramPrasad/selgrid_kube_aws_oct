@@ -37,16 +37,18 @@ spec:
           livenessProbe:
             httpGet:
               path: /wd/hub/status
-              port: 4444
-            initialDelaySeconds: 30
+              port: 5555
+            initialDelaySeconds: 60
             periodSeconds: 10
             timeoutSeconds: 5
+            failureThreshold: 3
           readinessProbe:
             httpGet:
               path: /wd/hub/status
-              port: 4444
-            initialDelaySeconds: 15
+              port: 5555
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 5
+            failureThreshold: 3
 
 

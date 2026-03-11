@@ -11,17 +11,13 @@ spec:
     - protocol: TCP
       port: 4444
       targetPort: 4444
-      name: hub
+      name: port0
     - protocol: TCP
       port: 4443
       targetPort: 4443
-      name: subscribe
+      name: port1
     - protocol: TCP
       port: 4442
       targetPort: 4442
-      name: publish
+      name: port2
   type: LoadBalancer
-  sessionAffinity: ClientIP
-  sessionAffinityConfig:
-    clientIP:
-      timeoutSeconds: 3600

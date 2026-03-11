@@ -15,12 +15,6 @@ spec:
       containers:
         - name: selenium-node-chrome
           image: selenium/node-chrome:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 5555
-              name: node
-            - containerPort: 7900
-              name: vnc
           env:
             - name: SE_EVENT_BUS_HOST
               value: selenium-hub-service.default.svc.cluster.local
@@ -28,34 +22,5 @@ spec:
               value: "4442"
             - name: SE_EVENT_BUS_SUBSCRIBE_PORT
               value: "4443"
-            - name: SE_HUB_HOST
-              value: selenium-hub-service.default.svc.cluster.local
-            - name: SE_HUB_PORT
-              value: "4444"
-            - name: NODE_MAX_INSTANCES
-              value: "5"
-            - name: NODE_MAX_SESSION
-              value: "5"
-          resources:
-            requests:
-              memory: "768Mi"
-              cpu: "500m"
-            limits:
-              memory: "2Gi"
-              cpu: "2000m"
-          startupProbe:
-            tcpSocket:
-              port: 5555
-            initialDelaySeconds: 10
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 60
-          livenessProbe:
-            tcpSocket:
-              port: 5555
-            initialDelaySeconds: 120
-            periodSeconds: 30
-            timeoutSeconds: 3
-            failureThreshold: 2
 
 

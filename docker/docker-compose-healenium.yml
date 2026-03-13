@@ -1,0 +1,86 @@
+version: "3.8"
+
+# ============================================================
+# Healenium Self-Healing Backend Services
+# ============================================================
+# This Docker Compose file starts the required backend services
+# for Healenium self-healing to work:
+#
+# 1. PostgreSQL      - Stores DOM snapshots & locator history
+# 2. Healenium Backend - REST API for healing decisions
+# 3. Selector Imitator - ML-based element matching service
+#
+# Usage:
+#   docker-compose -f docker-compose-healenium.yml up -d
+#   docker-compose -f docker-compose-healenium.yml down
+# ============================================================
+
+services:
+
+  # ----------------------------------------------------------
+  # PostgreSQL Database - Stores element locator snapshots
+  # ----------------------------------------------------------
+  healenium-db:
+    image: postgres:15-alpine
+    container_name: healenium-db
+    environment:
+      POSTGRES_DB: healenium
+      POSTGRES_USER: healenium_user
+      POSTGRES_PASSWORD: YDk2nmNs4s9aCP6K
+    ports:
+      - "5432:5432"
+    volumes:
+      - healenium-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U healenium_user -d healenium"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - healenium-net
+
+  # ----------------------------------------------------------
+  # Healenium Backend - REST API for self-healing decisions
+  # ----------------------------------------------------------
+  healenium-backend:
+    image: healenium/hlm-backend:latest
+    container_name: healenium-backend
+    environment:
+      SPRING_POSTGRES_DB: healenium
+      SPRING_POSTGRES_SCHEMA: healenium
+      SPRING_POSTGRES_USER: healenium_user
+      SPRING_POSTGRES_PASSWORD: YDk2nmNs4s9aCP6K
+      SPRING_POSTGRES_HOST: healenium-db
+      SPRING_POSTGRES_PORT: 5432
+      KEY_SELECTOR_URL: false
+      COLLECT_METRICS: true
+      HLM_LOG_LEVEL: info
+    ports:
+      - "7878:7878"
+    depends_on:
+      healenium-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - healenium-net
+
+  # ----------------------------------------------------------
+  # Selector Imitator - ML engine for locator matching
+  # ----------------------------------------------------------
+  healenium-selector-imitator:
+    image: healenium/hlm-selector-imitator:latest
+    container_name: healenium-selector-imitator
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    networks:
+      - healenium-net
+
+volumes:
+  healenium-db-data:
+    driver: local
+
+networks:
+  healenium-net:
+    driver: bridge

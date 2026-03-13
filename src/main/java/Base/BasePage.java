@@ -5,7 +5,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import utilities.PropertyHandler;
-import utilities.SelfHealingDriver;
+import utilities.CustomSelfHealingDriver;
 
 import java.time.Duration;
 import java.util.List;
@@ -28,12 +28,12 @@ public abstract class BasePage {
 
     protected String url;
     protected WebDriver driver;
-    protected SelfHealingDriver healingDriver;
+    protected CustomSelfHealingDriver healingDriver;
     WebDriverWait webDriverWait;
 
     public BasePage(WebDriver driver){
         this.driver = driver;
-        this.healingDriver = new SelfHealingDriver(driver);
+        this.healingDriver = new CustomSelfHealingDriver(driver);
         url = PropertyHandler.getProperty("url");
         webDriverWait = new WebDriverWait(driver, Duration.ofSeconds(10));
     }

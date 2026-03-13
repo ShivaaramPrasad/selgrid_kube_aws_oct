@@ -1,5 +1,6 @@
 package Base;
 
+import com.epam.healenium.SelfHealingDriver;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -12,13 +13,20 @@ import java.net.URL;
 import java.util.logging.Logger;
 
 /**
- * Enhanced DriverManager with Self-Healing capabilities.
+ * Enhanced DriverManager with Healenium Self-Healing integration.
  *
  * Provides:
+ * - Healenium SelfHealingDriver wrapper (auto-heals broken locators)
  * - Automatic driver initialization retry (handles grid connection issues)
  * - Driver health check before returning
  * - Safe quit with null checks
  * - Grid/Local auto-detection with recovery
+ *
+ * Healenium Integration:
+ * - Wraps WebDriver with SelfHealingDriver.create() when heal-enabled=true
+ * - Requires Healenium backend services running (docker-compose-healenium.yml)
+ * - Falls back to standard WebDriver if Healenium backend is unavailable
+ * - Configuration in src/main/resources/healenium.properties
  */
 public class DriverManager {
 
@@ -29,9 +37,10 @@ public class DriverManager {
     private static ThreadLocal<WebDriver> threadLocalDriver = new ThreadLocal<>();
 
     /**
-     * Initialize driver with self-healing retry logic.
+     * Initialize driver with self-healing retry logic and Healenium wrapper.
      * Retries up to MAX_INIT_RETRIES times if driver creation fails
      * (common with Selenium Grid under load).
+     * After successful creation, wraps with Healenium SelfHealingDriver.
      */
     public static WebDriver initDriver(){
         String gridUrl = getGridUrl();
@@ -39,15 +48,22 @@ public class DriverManager {
 
         for (int attempt = 1; attempt <= MAX_INIT_RETRIES; attempt++) {
             try {
+                WebDriver delegate;
                 if (gridUrl != null && !gridUrl.isEmpty()) {
                     logger.info("[DRIVER] Initializing RemoteWebDriver -> " + gridUrl + " (attempt " + attempt + ")");
-                    threadLocalDriver.set(new RemoteWebDriver(new URL(gridUrl), getChromeOptions()));
+                    delegate = new RemoteWebDriver(new URL(gridUrl), getChromeOptions());
                 } else {
                     logger.info("[DRIVER] Initializing local ChromeDriver (attempt " + attempt + ")");
-                    threadLocalDriver.set(new ChromeDriver(getChromeOptions()));
+                    delegate = new ChromeDriver(getChromeOptions());
                 }
-                threadLocalDriver.get().manage().window().maximize();
-                logger.info("[DRIVER] Driver initialized successfully");
+                delegate.manage().window().maximize();
+
+                // Wrap with Healenium SelfHealingDriver
+                WebDriver healeniumDriver = wrapWithHealenium(delegate);
+                threadLocalDriver.set(healeniumDriver);
+
+                logger.info("[DRIVER] Driver initialized successfully" +
+                        (healeniumDriver instanceof SelfHealingDriver ? " [Healenium ENABLED]" : " [Healenium DISABLED - fallback]"));
                 return threadLocalDriver.get();
 
             } catch (MalformedURLException e) {
@@ -64,6 +80,23 @@ public class DriverManager {
         }
         throw new RuntimeException("[SELF-HEAL DRIVER] Could not initialize driver after "
                 + MAX_INIT_RETRIES + " attempts", lastException);
+    }
+
+    /**
+     * Wrap a WebDriver with Healenium's SelfHealingDriver.
+     * Falls back to the original driver if Healenium is unavailable or fails.
+     */
+    private static WebDriver wrapWithHealenium(WebDriver delegate) {
+        try {
+            SelfHealingDriver healingDriver = SelfHealingDriver.create(delegate);
+            logger.info("[HEALENIUM] Successfully wrapped driver with Healenium SelfHealingDriver");
+            return healingDriver;
+        } catch (Exception e) {
+            logger.warning("[HEALENIUM] Failed to wrap with Healenium (backend may not be running): "
+                    + e.getMessage());
+            logger.info("[HEALENIUM] Falling back to standard WebDriver (custom self-healing still active via BasePage)");
+            return delegate;
+        }
     }
 
     public static ChromeOptions getChromeOptions(){

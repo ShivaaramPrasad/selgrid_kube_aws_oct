@@ -18,9 +18,9 @@ import java.util.logging.Logger;
  * - Generates alternate locators when primary locator fails
  * - Logs all healing actions for debugging
  */
-public class SelfHealingDriver {
+public class CustomSelfHealingDriver {
 
-    private static final Logger logger = Logger.getLogger(SelfHealingDriver.class.getName());
+    private static final Logger logger = Logger.getLogger(CustomSelfHealingDriver.class.getName());
 
     private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_MS = 500;
@@ -29,7 +29,7 @@ public class SelfHealingDriver {
 
     private final WebDriver driver;
 
-    public SelfHealingDriver(WebDriver driver) {
+    public CustomSelfHealingDriver(WebDriver driver) {
         this.driver = driver;
     }
 

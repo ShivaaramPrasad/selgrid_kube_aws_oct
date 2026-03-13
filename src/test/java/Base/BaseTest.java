@@ -32,7 +32,11 @@ public class BaseTest {
         String executionMode = (gridUrlProp == null || gridUrlProp.isEmpty()) ? "Local Execution" : "Grid Execution";
         System.out.println(executionMode);
         logger.info("[SUITE] Execution mode: " + executionMode);
-        logger.info("[SUITE] Self-healing enabled: RetryAnalyzer (2 retries), SelfHealingDriver, Screenshot on failure");
+        logger.info("[SUITE] Self-healing layers:");
+        logger.info("[SUITE]   1. Healenium (locator healing via backend - requires Docker services)");
+        logger.info("[SUITE]   2. CustomSelfHealingDriver (retry, alternate locators, JS fallback)");
+        logger.info("[SUITE]   3. RetryAnalyzer (2 automatic test retries)");
+        logger.info("[SUITE]   4. TestListener (screenshot on failure)");
     }
 
     @BeforeMethod

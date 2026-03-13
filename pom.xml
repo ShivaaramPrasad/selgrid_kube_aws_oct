@@ -36,6 +36,33 @@
       <version>4.21.0</version>
     </dependency>
 
+    <!-- Healenium Self-Healing -->
+    <dependency>
+      <groupId>com.epam.healenium</groupId>
+      <artifactId>healenium-web</artifactId>
+      <version>3.5.2</version>
+      <exclusions>
+        <!-- Exclude JUnit dependencies to prevent surefire from auto-detecting JUnit Platform
+             instead of TestNG. These come from testcontainers transitive dependency. -->
+        <exclusion>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter-engine</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter-api</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.testcontainers</groupId>
+          <artifactId>junit-jupiter</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>junit</groupId>
+          <artifactId>junit</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
 
   </dependencies>
   <build>

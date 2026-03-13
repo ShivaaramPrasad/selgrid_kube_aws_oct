@@ -35,7 +35,7 @@ public class Homepage extends BasePage {
 
     public List<String> getCategoriesList(){
         waitForVisible(categoriesDdnOtpCss);
-        List<WebElement> elements = driver.findElements(categoriesDdnOtpCss);
+        List<WebElement> elements = findElements(categoriesDdnOtpCss);
         return elements.stream().map(e -> e.getText()).collect(Collectors.toList());
     }
 
@@ -58,19 +58,19 @@ public class Homepage extends BasePage {
 
     public List<String> getProductNameList(){
         waitForVisible(productNameCss);
-        List<WebElement> elements = driver.findElements(productNameCss);
+        List<WebElement> elements = findElements(productNameCss);
         return elements.stream().map(e -> e.getText()).collect(Collectors.toList());
     }
 
     public List<String> getProductPriceList(){
         waitForVisible(productPriceCss);
-        List<WebElement> elements = driver.findElements(productPriceCss);
+        List<WebElement> elements = findElements(productPriceCss);
         return elements.stream().map(e -> e.getText()).collect(Collectors.toList());
     }
 
     public ProductDetailPage selectProduct(int i){
         waitForVisible(productNameCss);
-        List<WebElement> elements = driver.findElements(productNameCss);
+        List<WebElement> elements = findElements(productNameCss);
         elements.get(i-1).click();
         return new ProductDetailPage(driver);
     }
